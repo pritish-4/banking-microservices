@@ -1,0 +1,51 @@
+server:
+  port: 8085
+  address: 127.0.0.1
+
+spring:
+  application:
+    name: notification-service
+
+  datasource:
+    url: jdbc:mysql://localhost:3306/notification_service_db
+    username: ${DB_USERNAME:root}
+    password: ${DB_PASSWORD:root}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQL8Dialect
+
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+    consumer:
+      group-id: notification-group
+      auto-offset-reset: earliest
+      key-deserializer: org.springframework.kafka.support.serializer.ErrorHandlingDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.ErrorHandlingDeserializer
+      properties:
+        spring.deserializer.key.delegate.class: org.apache.kafka.common.serialization.StringDeserializer
+        spring.deserializer.value.delegate.class: org.springframework.kafka.support.serializer.JsonDeserializer
+        spring.json.trusted.packages: "com.banking.transaction.event,com.banking.notification.event,com.banking.auth.event,com.banking.account.event,com.banking.notification.event.auth,com.banking.notification.event.account"
+        spring.json.use.type.headers: false
+        spring.json.value.default.type: com.banking.notification.event.TransactionEvent
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+  instance:
+    hostname: localhost
+    non-secure-port: 8085
+    prefer-ip-address: false
+
+app:
+  kafka:
+    topic:
+      transaction-events: transaction-events
+      auth-events: auth-events
+      account-events: account-events

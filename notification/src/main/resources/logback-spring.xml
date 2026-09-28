@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+
+    <property name="LOG_FILE" value="logs/notification-service.log"/>
+    <property name="SMS_LOG_FILE" value="logs/notification-sms.log"/>
+    <property name="LOG_PATTERN" value="%d{HH:mm:ss} %-5level [notification-service] [%logger{36}] - %msg%n"/>
+    <property name="SMS_PATTERN" value="%d{dd-MM-yyyy HH:mm:ss} | %msg%n"/>
+
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>${LOG_PATTERN}</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${LOG_FILE}</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <fileNamePattern>logs/notification-service.%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <maxFileSize>10MB</maxFileSize>
+            <maxHistory>7</maxHistory>
+            <totalSizeCap>100MB</totalSizeCap>
+        </rollingPolicy>
+        <encoder>
+            <pattern>${LOG_PATTERN}</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="SMS_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${SMS_LOG_FILE}</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <fileNamePattern>logs/notification-sms.%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <maxFileSize>10MB</maxFileSize>
+            <maxHistory>7</maxHistory>
+            <totalSizeCap>50MB</totalSizeCap>
+        </rollingPolicy>
+        <encoder>
+            <pattern>${SMS_PATTERN}</pattern>
+        </encoder>
+    </appender>
+
+    <!-- SMS-only logger: writes exclusively to the SMS log file -->
+    <logger name="SMS_LOGGER" level="INFO" additivity="false">
+        <appender-ref ref="SMS_FILE"/>
+    </logger>
+
+    <root level="INFO">
+        <appender-ref ref="CONSOLE"/>
+        <appender-ref ref="FILE"/>
+    </root>
+
+    <logger name="com.banking.notification" level="DEBUG"/>
+
+</configuration>
