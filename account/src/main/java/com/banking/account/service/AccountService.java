@@ -78,7 +78,14 @@ public class AccountService {
             }
         }
 
-        return new BalanceResponse(acc.getAccountNumber(), acc.getBalance());
+        return new BalanceResponse(acc.getId(), acc.getAccountNumber(), acc.getBalance());
+    }
+
+    public BalanceResponse resolveAccount(String accountNumber) {
+        log.info("Resolving accountId for account: {}", accountNumber);
+        Account acc = repo.findByAccountNumber(accountNumber)
+                .orElseThrow(() -> new AccountNotFoundException("Account not found: " + accountNumber));
+        return new BalanceResponse(acc.getId(), acc.getAccountNumber(), acc.getBalance());
     }
 
     public List<AdminAccountResponse> getAllAccounts() {

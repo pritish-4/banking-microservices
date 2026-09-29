@@ -52,6 +52,11 @@ public class AccountController {
         return ResponseEntity.ok(service.getBalance(accountNumber));
     }
 
+    @GetMapping("/resolve/{accountNumber}")
+    public ResponseEntity<BalanceResponse> resolveAccount(@PathVariable String accountNumber) {
+        return ResponseEntity.ok(service.resolveAccount(accountNumber));
+    }
+
     @GetMapping("/internal/{id}")
     public ResponseEntity<AdminAccountResponse> getAccountInternal(@PathVariable Long id) {
         return ResponseEntity.ok(service.getAccountInternal(id));
