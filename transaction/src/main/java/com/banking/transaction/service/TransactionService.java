@@ -2,6 +2,7 @@ package com.banking.transaction.service;
 
 import com.banking.transaction.client.AccountClient;
 import com.banking.transaction.dto.AccountBalanceResponse;
+import com.banking.transaction.dto.CustomerAccountResponse;
 import com.banking.transaction.dto.DepositRequest;
 import com.banking.transaction.dto.TransactionResponse;
 import com.banking.transaction.dto.TransferRequest;
@@ -15,7 +16,6 @@ import com.banking.transaction.exception.TransactionNotFoundException;
 import com.banking.transaction.repo.TransactionRepo;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -100,20 +100,24 @@ public class TransactionService {
         return mapToResponse(tx);
     }
 
-    public List<TransactionResponse> getMyTransactions() {
-        Long userId = (Long) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        log.info("Fetching transactions for userId: {}", userId);
-        return repo.findBySourceAccountIdOrTargetAccountId(userId, userId)
-                .stream()
+    public List<TransactionResponse> getMyTransactions(String authHeader) {
+        List<Long> accountIds = accountClient.getMyAccounts(authHeader)
+                .stream().map(CustomerAccountResponse::accountId).toList();
+        log.info("Fetching transactions for accountIds: {}", accountIds);
+        return accountIds.stream()
+                .flatMap(id -> repo.findBySourceAccountIdOrTargetAccountId(id, id).stream())
+                .distinct()
                 .map(this::mapToResponse)
                 .toList();
     }
 
-    public List<TransactionResponse> getMyTransactionsByType(TransactionType type) {
-        Long userId = (Long) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        log.info("Fetching {} transactions for userId: {}", type, userId);
-        return repo.findBySourceAccountIdOrTargetAccountIdAndType(userId, userId, type)
-                .stream()
+    public List<TransactionResponse> getMyTransactionsByType(TransactionType type, String authHeader) {
+        List<Long> accountIds = accountClient.getMyAccounts(authHeader)
+                .stream().map(CustomerAccountResponse::accountId).toList();
+        log.info("Fetching {} transactions for accountIds: {}", type, accountIds);
+        return accountIds.stream()
+                .flatMap(id -> repo.findBySourceAccountIdOrTargetAccountIdAndType(id, id, type).stream())
+                .distinct()
                 .map(this::mapToResponse)
                 .toList();
     }

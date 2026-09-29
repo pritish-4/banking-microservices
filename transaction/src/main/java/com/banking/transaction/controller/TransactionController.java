@@ -54,12 +54,14 @@ public class TransactionController {
     @GetMapping("/my")
     @PreAuthorize("hasRole('CUSTOMER')")
     public ResponseEntity<List<TransactionResponse>> getMyTransactions(
-            @RequestParam(required = false) TransactionType type) {
+            @RequestParam(required = false) TransactionType type,
+            HttpServletRequest httpRequest) {
         log.info("GET /transactions/my - type: {}", type);
+        String authHeader = httpRequest.getHeader("Authorization");
         if (type != null) {
-            return ResponseEntity.ok(service.getMyTransactionsByType(type));
+            return ResponseEntity.ok(service.getMyTransactionsByType(type, authHeader));
         }
-        return ResponseEntity.ok(service.getMyTransactions());
+        return ResponseEntity.ok(service.getMyTransactions(authHeader));
     }
 
     @GetMapping("/{transactionId}")
