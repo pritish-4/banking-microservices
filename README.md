@@ -8,8 +8,8 @@ A full-stack banking application built with a microservices architecture using S
 
 ```
                         ┌─────────────────┐
-                        │  React Frontend  │
-                        │   (Port 3000)    │
+                        │  React Frontend │
+                        │   (Port 3000)   │
                         └────────┬────────┘
                                  │
                         ┌────────▼────────┐
@@ -31,10 +31,10 @@ A full-stack banking application built with a microservices architecture using S
                         └─────────────────┘
                                  │
                     ┌────────────▼────────────┐
-                    │      Apache Kafka        │
-                    │  transaction-events      │
-                    │  auth-events             │
-                    │  account-events          │
+                    │      Apache Kafka       │
+                    │  transaction-events     │
+                    │  auth-events            │
+                    │  account-events         │
                     └────────────┬────────────┘
                                  │
                     ┌────────────▼────────────┐
