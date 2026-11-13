@@ -85,8 +85,10 @@ A full-stack banking application built with a microservices architecture using S
 
 - Java 21
 - Maven
-- MySQL
-- Apache Kafka + Zookeeper
+- Docker Desktop (Docker Engine running)
+- Java 21
+- Maven
+- Node.js + npm (for frontend)
 - Node.js + npm (for frontend)
 
 ---
@@ -110,10 +112,74 @@ Each service uses the following environment variables. You can set them or use t
 
 | Variable | Default | Description |
 |---|---|---|
-| `DB_USERNAME` | `root` | MySQL username |
-| `DB_PASSWORD` | `root` | MySQL password |
-| `JWT_SECRET` | `mySuperSecretJwtKeyThatIsAtLeast32CharactersLong` | JWT signing key |
+| `DB_USERNAME` | `banking_app` | MySQL application username |
+| `DB_PASSWORD` | Set in local `.env` | MySQL application password |
+| `JWT_SECRET` | Set in local `.env` | JWT signing key |
 | `KAFKA_BOOTSTRAP_SERVERS` | `localhost:9092` | Kafka broker address |
+
+---
+
+## Local Infrastructure (Docker Compose)
+
+MySQL and Kafka run in Docker. The Spring Boot services can continue running locally from IntelliJ during development.
+
+### 1. Configure local environment
+
+Copy the example file and edit the values. Do not commit `.env`.
+
+PowerShell:
+```powershell
+Copy-Item .env.example .env
+```
+
+Set strong local values for `MYSQL_ROOT_PASSWORD`, `DB_PASSWORD`, and `JWT_SECRET`. The application database user is `banking_app`.
+
+### 2. Start MySQL and Kafka
+
+From the repository root:
+```powershell
+docker compose up -d
+docker compose ps
+```
+
+Wait until both services report healthy. On first startup, MySQL creates the four databases:
+- `auth_service_db`
+- `account_service_db`
+- `transaction_service_db`
+- `notification_service_db`
+
+The MySQL data and Kafka data are persisted in named Docker volumes.
+
+### 3. Connect Spring Boot services
+
+The services use these local development settings:
+- MySQL: `localhost:3306`
+- Kafka: `localhost:9092`
+- `DB_USERNAME=banking_app`
+- `DB_PASSWORD` from `.env`
+- `KAFKA_BOOTSTRAP_SERVERS=localhost:9092`
+- `JWT_SECRET` from `.env`
+
+Set these environment variables in each IntelliJ Run Configuration, or load them into the shell before starting the services. Do not put real secrets in source-controlled YAML files.
+
+### 4. Stop infrastructure
+
+```powershell
+docker compose down
+```
+
+This stops containers but preserves database and Kafka data. To permanently delete local data as well (destructive):
+```powershell
+docker compose down -v
+```
+
+### Notes
+
+- Kafka runs in single-node KRaft mode; Zookeeper is not required.
+- Ports 3306 and 9092 are bound to localhost for local development.
+- The single-node Kafka and MySQL configuration is for development/integration testing, not a highly available production deployment.
+- MySQL initialization scripts run only when the data volume is first created. If you change the initialization SQL later, existing volumes are not reinitialized.
+- Keep `.env` private and use a secrets manager for deployed environments.
 
 ---
 
